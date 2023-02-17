@@ -162,7 +162,7 @@ class Game{
         gameover.style.display = 'block';
         btn.style.display = 'block';
 
-        this.plane.visible = false;
+        // this.plane.visible = false;
     }
 
     incScore(){

@@ -11,6 +11,7 @@ class Obstacles{
         this.loadStar();
 		this.loadBomb();
 		this.tmpPos = new Vector3();
+        this.explosions = [];
     }
 
     loadStar(){
@@ -117,12 +118,18 @@ class Obstacles{
     }
 
     removeExplosion( explosion ){
-    
+        const indexToDel = this.explosions.indexOf(explosion);
+        if (indexToDel != -1) this.explosions.splice(indexToDel, 1);
     }
 
     reset(){
         this.obstacleSpawn = { pos: 20, offset: 5 };
         this.obstacles.forEach( obstacle => this.respawnObstacle(obstacle) );
+        let count = 0;
+        while (this.explosions.length > 0 && count < 100) {
+            this.explosions[0].onComplete();
+            count++; //good practice for while loops
+        }
     }
 
     respawnObstacle( obstacle ){
@@ -164,9 +171,12 @@ class Obstacles{
 					this.hit(child);
                     return true;
                 }
-            })
-            
+            });
         }
+
+        this.explosions.forEach( explosion => {
+            explosion.update( dt );
+        });
     }
 
 	hit(obj){
@@ -174,6 +184,7 @@ class Obstacles{
 			obj.visible = false;
 			this.game.incScore();
         }else{
+            this.explosions.push( new Explosion(obj, this));
 			this.game.decLives();
         }
 	}

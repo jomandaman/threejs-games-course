@@ -27,9 +27,11 @@ class App{
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         container.appendChild( this.renderer.domElement );
-		this.setEnvironment();
+		this.setEnvironment(); // randomly important?
 		
         //Add code here to code-along with the video
+        this.loadingBar = new LoadingBar();
+        this.loadGLTF();
 
         this.controls = new OrbitControls( this.camera, this.renderer.domElement );
         
@@ -55,7 +57,29 @@ class App{
     }
     
     loadGLTF(){
-        
+        const loader = new GLTFLoader().setPath('../../assets/plane/');
+
+        loader.load(
+            'microplane.glb',
+            gltf => {
+                const bbox = new THREE.Box3().setFromObject( gltf.scene );
+                console.log(`min:${bbox.min.x.toFixed(2)},${bbox.min.y.toFixed(2)},${bbox.min.z.toFixed(2)} -  max:${bbox.max.x.toFixed(2)},${bbox.max.y.toFixed(2)},${bbox.max.z.toFixed(2)}`);
+                
+                this.plane = gltf.scene;
+                
+				this.scene.add( gltf.scene );
+                
+                this.loadingBar.visible = false;
+				
+				this.renderer.setAnimationLoop( this.render.bind(this));
+            },
+            xhr => {
+                this.loadingBar.progress = (xhr.loaded / xhr.total);
+            },
+            err => {
+                console.error( err );
+            }
+        );
     }
     
     resize(){
